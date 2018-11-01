@@ -20,10 +20,11 @@ PRODUCT_COPY_FILES += \
 PRODUCT_DEVICE := lettuce
 PRODUCT_NAME := omni_lettuce
 PRODUCT_BRAND := YU
-PRODUCT_MODEL := Yuphoria
+PRODUCT_MODEL := YU5010
 PRODUCT_MANUFACTURER := YU
 
 # Enable stock zip packages flash
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     ro.build.product=YUPHORIA \
     ro.product.device=YUPHORIA
+    ro.product.model=YU5010
