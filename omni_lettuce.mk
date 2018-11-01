@@ -13,8 +13,7 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/dt.img:dt.img \
-    $(LOCAL_PATH)/kernel:kernel \
-    $(LOCAL_PATH)/recovery.fstab:root/etc/recovery.fstab
+    $(LOCAL_PATH)/kernel:kernel
 
 ## Device identifier. This must come after all inclusions
 PRODUCT_DEVICE := lettuce
