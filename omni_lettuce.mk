@@ -23,3 +23,5 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     ro.build.product=YUPHORIA \
     ro.product.device=YUPHORIA
     ro.product.model=YU5010
+
+ALLOW_MISSING_DEPENDENCIES := true
