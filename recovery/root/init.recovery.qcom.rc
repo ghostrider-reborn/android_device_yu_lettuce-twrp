@@ -13,9 +13,16 @@ on late-init
 
     trigger boot
 
-on boot
-    write /sys/module/lpm_levels/parameters/sleep_disabled 0
+on fs
+    # Make bootdevice symlink
+    wait /dev/block/platform/soc.0/${ro.boot.bootdevice}
+    symlink /dev/block/platform/soc.0/${ro.boot.bootdevice} /dev/block/bootdevice
 
+    # Enable DT2W
+    chmod 0664 /sys/devices/soc.0/78b9000.i2c/i2c-5/5-0040/double_tap_enable
+    write /sys/devices/soc.0/78b9000.i2c/i2c-5/5-0040/double_tap_enable 1
+
+on boot
     # HMP scheduler load tracking settings
     write /proc/sys/kernel/sched_window_stats_policy 3
     write /proc/sys/kernel/sched_ravg_hist_size 3
@@ -31,39 +38,62 @@ on boot
     # enable governor
     write /sys/devices/system/cpu/cpu0/online 1
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "interactive"
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 800000
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 1152000
-    # enable thermal core_control now
-    write /sys/module/msm_thermal/core_control/enabled 1
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 200000
 
-    write /sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay "25000 1094400:50000"
+    write /sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay 20000
     write /sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load 90
-    write /sys/devices/system/cpu/cpufreq/interactive/timer_rate 30000
-    write /sys/devices/system/cpu/cpufreq/interactive/hispeed_freq 998400
+    write /sys/devices/system/cpu/cpufreq/interactive/timer_rate 60000
+    write /sys/devices/system/cpu/cpufreq/interactive/hispeed_freq 1094400
     write /sys/devices/system/cpu/cpufreq/interactive/io_is_busy 0
-    write /sys/devices/system/cpu/cpufreq/interactive/max_freq_hysteresis 50000
-    write /sys/devices/system/cpu/cpufreq/interactive/target_loads "1 800000:85 998400:90 1094400:80"
-    write /sys/devices/system/cpu/cpufreq/interactive/min_sample_time 50000
-    write /sys/devices/system/cpu/cpufreq/interactive/max_freq_hysteresis 50000
+    write /sys/devices/system/cpu/cpufreq/interactive/boostpulse_duration 60000
+    write /sys/devices/system/cpu/cpufreq/interactive/target_loads "1 998400:85 1094400:90 1209600:95"
+    write /sys/devices/system/cpu/cpufreq/interactive/min_sample_time 60000
+    write /sys/devices/system/cpu/cpufreq/interactive/max_freq_hysteresis 80000
+    
+    # enable thermal core_control now
+    write /sys/kernel/msm_thermal/zone0 "1152000 64 61"
+    write /sys/kernel/msm_thermal/zone1 "1094400 68 65"
+    write /sys/kernel/msm_thermal/zone2 "8000000 70 69"
+    write /sys/kernel/msm_thermal/zone3 "533333 73 71"
+    write /sys/kernel/msm_thermal/zone4 "400000 77 74"
+    write /sys/module/msm_thermal/core_control/enabled 1
+    write /sys/kernel/msm_thermal/sampling_ms 1000
+    write /sys/kernel/msm_thermal/enabled 1
 
     # bring all CPUs online
     write /sys/devices/system/cpu/cpu1/online 1
     write /sys/devices/system/cpu/cpu2/online 1
     write /sys/devices/system/cpu/cpu3/online 1
+    
+    # Enable low power modes
+    write /sys/module/lpm_levels/parameters/sleep_disabled 0
 
-    chown root system /sys/devices/system/cpu/cpu1/online
-    chown root system /sys/devices/system/cpu/cpu2/online
-    chown root system /sys/devices/system/cpu/cpu3/online
-    chmod 664 /sys/devices/system/cpu/cpu1/online
-    chmod 664 /sys/devices/system/cpu/cpu2/online
-    chmod 664 /sys/devices/system/cpu/cpu3/online
+    # Set RPS mask
+    write /sys/class/net/rmnet0/queues/rx-0/rps_cpus 2
 
+    # Enable core control
+    write /sys/devices/system/cpu/cpu0/core_ctl/min_cpus 0
+    write /sys/devices/system/cpu/cpu0/core_ctl/max_cpus 4
+    write /sys/devices/system/cpu/cpu0/core_ctl/busy_up_thres 68
+    write /sys/devices/system/cpu/cpu0/core_ctl/busy_down_thres 30
+    write /sys/devices/system/cpu/cpu0/core_ctl/offline_delay_ms 100
+    write /sys/devices/system/cpu/cpu0/core_ctl/is_big_cluster 0
+    write /sys/devices/system/cpu/cpu0/core_ctl/task_thres 4
+    
+    # enable CPU input boost
+    write /sys/module/cpu_boost/parameters/boost_ms 40
+    write /sys/module/cpu_boost/parameters/input_boost_freq "0:998400 1:998400"
+
+    # Set read_ahead value to 2MB
+    write /sys/block/mmcblk0/queue/read_ahead_kb 2048
+    write /sys/block/mmcblk1/queue/read_ahead_kb 2048
+    
 service qseecomd /sbin/qseecomd
-    class core
-    user root
-    group root system drmrpc
-    seclabel u:r:recovery:s0
+    oneshot
     disabled
+    user root
+    group root
+    seclabel u:r:recovery:s0
 
 on property:ro.crypto.state=encrypted
     start qseecomd
