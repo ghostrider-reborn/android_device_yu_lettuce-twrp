@@ -11,11 +11,7 @@ PRODUCT_PACKAGES += \
     charger_res_images \
     charger
 
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/dt.img:dt.img \
-    $(LOCAL_PATH)/kernel:kernel
-
-## Device identifier. This must come after all inclusions
+# Device identifier. This must come after all inclusions
 PRODUCT_DEVICE := lettuce
 PRODUCT_NAME := omni_lettuce
 PRODUCT_BRAND := YU
