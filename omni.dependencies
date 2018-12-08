@@ -1,0 +1,8 @@
+[
+  {
+    "remote":"github",
+    "repository": "lettuce-pie/android_kernel_cyanogen_msm8916",
+    "target_path": "kernel/cyanogen/msm8916",
+    "revision": "lineage-16.0-stable"
+  }
+]
