@@ -19,4 +19,4 @@ lunch omni_lettuce-eng
 mka recoveryimage
 ```
 
-Kernel sources are available at: https://github.com/lettuce-pie/android_kernel_cyanogen_msm8916
+Kernel sources are available at: https://github.com/LineageOS/android_kernel_cyanogen_msm8916
